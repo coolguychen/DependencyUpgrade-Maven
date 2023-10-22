@@ -43,9 +43,6 @@ public class SingleModule {
         this.dependencySet = dependencySet;
     }
 
-    //所有依赖对应的更高版本的集合
-    private List<List<Dependency>> higherSet = new ArrayList<>();
-
     //得到的依赖升级版本的结果集合
     private List<List<Dependency>> resultSet = new ArrayList<>();
 
@@ -129,6 +126,50 @@ public class SingleModule {
             }
         }
 
+    }
+
+    /**
+     * 获取单模块项目的可升级方案
+     * @param projectPath 给定一个项目路径
+     * @param type 0表示按照发行时间新的推荐，
+     * 1表示按照使用量多的推荐，
+     * 2表示按照漏洞数少的推荐
+     * @return
+     * @throws InterruptedException
+     */
+    public List<List<Dependency>> getSingleUpgradeSolutions(String projectPath, int type) throws InterruptedException {
+        parsePom();
+        // TODO: 2023/10/19 先对原项目 进行冲突判断
+        boolean isConflictBefore = conflictDetectBefore();
+        if (!isConflictBefore) {
+            //如果原项目没有冲突，加入无冲突集合
+            System.out.println("原项目无冲突");
+            getResWithoutConflict().add(dependencySet);
+        }
+
+        // 如果没有冲突，可以告诉用户没有冲突，但可以给出升级的无冲突版本
+        // 有冲突，推荐无冲突版本
+        singleModuleUpgrade(dependencySet);
+        // 对升级后的结果集进行有无冲突的判断
+        conflictDetectAfter();
+
+        // 如果没有无冲突的升级版本
+        if (resWithoutConflict.size() != 0) {
+            System.out.println("以下是无冲突的推荐版本");
+            // 将recommend设置为resWithoutConflict
+            setRecommendDepSet(resWithoutConflict);
+        } else {
+            System.out.println("以下是调解后的版本");
+        }
+
+        int id = 0;
+        for(List<Dependency> dplist : recommendDepSet) {
+            System.out.println(id ++);
+            for(Dependency d: dplist) {
+                d.printDependency();
+            }
+        }
+        return recommendDepSet;
     }
 
 
@@ -287,26 +328,6 @@ public class SingleModule {
         }
     }
 
-    /**
-     * 获得最终结果集
-     * 多列表笛卡尔积
-     */
-    public void getResults() {
-        List<List<Dependency>> dimensionValue = higherSet;    // 原来的List
-        List<List<Dependency>> res = new ArrayList<>(); //返回集合
-        descartes(dimensionValue, res, 0, new ArrayList<>());
-        //打印结果集信息
-        for (List<Dependency> dp : res) {
-            List<Dependency> list = new ArrayList<>();
-//            System.out.println(dp.size()); //dp.size()为依赖数目
-            for (Dependency d : dp) {
-//                System.out.print(d.getGroupId() + ":" + d.getArtifactId() + ":"+ d.getVersion() + " ");
-                list.add(d);
-            }
-            //加入结果集
-            resultSet.add(list);
-        }
-    }
 
 
     public boolean conflictDetectBefore() {
