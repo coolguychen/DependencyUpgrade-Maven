@@ -9,30 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class RecommendSolution {
-    DependencyTree dependencyTree; //解析pom得到一个dependencyTree
 
-    // Input:
-    // Outpur: solutions
-
-    //
-    // TODO: 2023/10/15 读入conflictDeps
-    // 1. 升级pom，组成笛卡尔积?
-    // 2.
-    // 3.
-
-
-    public void recommendLibByDate(List<Dependency> libsVersions) {
-        //date从新到旧
-    }
-
-
-    public void recommendLibByUasge(List<Dependency> libsVersions) {
-        //usage从大到小
-    }
-
-
-
-    // TODO: 2023/10/16 Sort Usage
     public static List<Dependency> sortByUsage(List<Dependency> dependencies) {
         Collections.sort(dependencies, new Comparator<Dependency>() {
             @Override
@@ -52,7 +29,6 @@ public class RecommendSolution {
         return dependencies;
     }
 
-    // TODO: 2023/10/16 Sort Date
 
     public static List<Dependency> sortByDate(List<Dependency> dependencies) {
         Collections.sort(dependencies, new Comparator<Dependency>() {
@@ -84,8 +60,6 @@ public class RecommendSolution {
         return dependencies;
     }
 
-
-    // TODO: 2023/10/16 Sort vulNums
     public static List<Dependency> sortByVulNums(List<Dependency> dependencies) {
         Collections.sort(dependencies, new Comparator<Dependency>() {
             @Override

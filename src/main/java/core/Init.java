@@ -11,6 +11,7 @@ public class Init {
     // 文件路径
     private String filePath;
     private int type;
+    private int id;
     private BufferedReader result;
 
     public void inputPath(){
@@ -71,4 +72,15 @@ public class Init {
     public BufferedReader getResult() {
         return result;
     }
+
+    public void inputId() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("请需要的升级方案id：");
+        id = scanner.nextInt();
+    }
+
+    public int getId() {
+        return id;
+    }
+
 }

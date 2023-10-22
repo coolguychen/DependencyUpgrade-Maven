@@ -217,13 +217,10 @@ public class DependencyTree {
                         groupId = info[0].substring(index + 3);
                     }
                     String[] key = new String[]{groupId, artifactId};
-
                     //如果depth为0 设置为父节点
                     if (depth == 0) {
                         parentDependency = new Dependency(groupId, artifactId, version);
                     }
-
-
                     // TODO: 2023/10/21 查看该库在db中是否存在
                     String date = "";
                     String usage = "";

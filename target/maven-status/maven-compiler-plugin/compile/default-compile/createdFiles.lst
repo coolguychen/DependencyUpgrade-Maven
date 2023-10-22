@@ -8,7 +8,6 @@ util\HttpUtil$1.class
 util\IOUtil.class
 core\SingleModule.class
 util\RandomUtil.class
-core\RemoteFolderAccess.class
 crawlAllVersions.class
 depModel\Dependency.class
 util\HttpUtil.class

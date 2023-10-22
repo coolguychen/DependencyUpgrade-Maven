@@ -19,17 +19,44 @@ public class SingleModule {
     private static String projectPath;
     //项目路径下的pom文件路径
     private static String pomPath;
+
+    public static String getPomPath() {
+        return pomPath;
+    }
+
+    public static void setPomPath(String pomPath) {
+        SingleModule.pomPath = pomPath;
+    }
+
+    public static String getProjectPath() {
+        return projectPath;
+    }
+
+    public static void setProjectPath(String projectPath) {
+        SingleModule.projectPath = projectPath;
+    }
+
+    public static int getType() {
+        return type;
+    }
+
+    public static void setType(int type) {
+        SingleModule.type = type;
+    }
+
     private static int type;
+
     JDBC jdbc = new JDBC();
 
     //构造函数
-    SingleModule() {
+    public SingleModule() {
 
     }
 
-    SingleModule(String path) {
+    public SingleModule(String path, int _type) {
         projectPath = path;
         pomPath = path + "/pom.xml";
+        type = _type;
     }
 
     //解析出来的项目的依赖的集合
@@ -91,7 +118,7 @@ public class SingleModule {
 
     public static void main(String[] args) throws InterruptedException {
         type = 0;
-        SingleModule singleModule = new SingleModule("D:\\1javawork\\Third Party Libraries\\TestDemo");
+        SingleModule singleModule = new SingleModule("D:\\1javawork\\Third Party Libraries\\TestDemo", 0);
         singleModule.parsePom();
 //        singleModule.setDependencySet(list1);
         // TODO: 2023/10/19 先对原项目 进行冲突判断
@@ -134,10 +161,14 @@ public class SingleModule {
      * @param type 0表示按照发行时间新的推荐，
      * 1表示按照使用量多的推荐，
      * 2表示按照漏洞数少的推荐
-     * @return
+     * @return List<List<Dependency>> 推荐方案的列表
      * @throws InterruptedException
      */
     public List<List<Dependency>> getSingleUpgradeSolutions(String projectPath, int type) throws InterruptedException {
+        // 设定目录 & type
+        setProjectPath(projectPath);
+        setType(type);
+        setPomPath(projectPath+"/pom.xml");
         parsePom();
         // TODO: 2023/10/19 先对原项目 进行冲突判断
         boolean isConflictBefore = conflictDetectBefore();
@@ -541,5 +572,14 @@ public class SingleModule {
         return directDeps;
     }
 
-
+    // TODO: 2023/10/22 根据选择的方案 生成 pom文件
+    public void getUpgradedPom(int id) {
+        // 获取推荐的依赖列表
+        List<Dependency> recommend = recommendDepSet.get(id);
+        // 如果 id == 2,那么生成的是pom2.xml
+        String newPomPath = projectPath + "/pom" + id + ".xml";
+        IOUtil ioUtil = new IOUtil();
+        ioUtil.copyFile(pomPath, newPomPath); // 先复制原来的到pomPath
+        ioUtil.modifyDependenciesXml(newPomPath, recommend);
+    }
 }

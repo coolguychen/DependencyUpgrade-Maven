@@ -48,66 +48,9 @@ public class IOUtil {
         property2.addText("8");
     }
 
-    /**
-     * 读取pom文件的demo
-     */
-    private static void readXmlByDom4J() {
-        try {
-            // 1. 创建org.dom4j.io.SAXReader对象
-            SAXReader saxReader = new SAXReader();
-            InputStream ins = new FileInputStream(pomPath);
-            Document document = saxReader.read(ins);
-            Element rootElement = document.getRootElement();
-            System.out.println("根节点的名称是：" + rootElement.getName());
-            Iterator iterator = rootElement.elementIterator();
-            while (iterator.hasNext()) {
-                Element element = (Element) iterator.next();
-                // 获取所有属性名和属性值
-                List<Attribute> attributesList = element.attributes();
-                for (Attribute attribute : attributesList) {
-                    System.out.println("属性名：" + attribute.getName() + "======属性值" + attribute.getValue());
-                }
-
-                // 遍历子节点
-                Iterator childIterator = element.elementIterator();
-                while (childIterator.hasNext()) {
-                    Element child = (Element) childIterator.next();
-                    System.out.println("属性名：" + child.getName() + "======属性值" + child.getStringValue());
-                }
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (DocumentException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    /**
-     * 写入pom文件的demo
-     */
-    public static void writeXmlDemo() {
-        //子节点 dependencies
-        Element dependencies = root.addElement("dependencies");
-        Element dependency1 = dependencies.addElement("dependency");
-        Element element21 = dependency1.addElement("groupId");
-        element21.addText("org.apache.httpcomponents");
-        Element element22 = dependency1.addElement("artifactId");
-        element22.addText("httpclient");
-        Element element23 = dependency1.addElement("version");
-        element23.addText("4.5.13");
-
-        //子节点 dependency
-        Element dependency2 = dependencies.addElement("dependency");
-        Element element31 = dependency2.addElement("groupId");
-        element31.addText("org.slf4j");
-        Element element32 = dependency2.addElement("artifactId");
-        element32.addText("slf4j-nop");
-        Element element33 = dependency2.addElement("version");
-        element33.addText("1.7.25");
-
-        writeXml(document,pomPath);
-
+    public static void main(String[] args) {
+        IOUtil ioUtil = new IOUtil();
+        ioUtil.modifyDependencyManagement();
     }
 
     /**
@@ -182,8 +125,10 @@ public class IOUtil {
                 dependencies = root.element("dependencyManagement").element("dependencies");
             }
             //不为空才能继续
+            // 加入dependency的标签
             if(dependencies != null) {
                 List<Element> list = dependencies.elements();
+                // 遍历依赖列表
                 for (Dependency dependency : dependencyList) {
                     String groupId1 = dependency.getGroupId();
                     String artifactId1 = dependency.getArtifactId();
@@ -201,9 +146,21 @@ public class IOUtil {
                             element2.addText(artifactId1);
                             Element element3 = depElement.addElement("version");
                             element3.addText(version1);
+                            List<Dependency> exclusions = dependency.getExclusionDependency();
+                            if (!exclusions.isEmpty()) {
+                                Element exclusionsElement = depElement.addElement("exclusions");
+                                for (Dependency exclusion : exclusions) {
+                                    String eGroupId = exclusion.getGroupId();
+                                    String eArtifactId = exclusion.getArtifactId();
+                                    Element exclusionElement  = exclusionsElement.addElement("exclusion");
+                                    Element e1 = exclusionElement.addElement("groupId");
+                                    e1.addText(eGroupId);
+                                    Element e2 = exclusionElement.addElement("artifactId");
+                                    e2.addText(eArtifactId);
+                                }
+                            }
                         }
                     }
-
                 }
                 // 调用下面的静态方法完成xml的写出
                 //写入xml文件
@@ -272,6 +229,42 @@ public class IOUtil {
     }
 
 
+
+    public static void generatePom(List<Dependency> set, String filePath) {
+        StringBuilder pomContent = new StringBuilder();
+
+        for (Dependency dependency : set) {
+            pomContent.append("        <dependency>\n");
+            pomContent.append("            <groupId>").append(dependency.getGroupId()).append("</groupId>\n");
+            pomContent.append("            <artifactId>").append(dependency.getArtifactId()).append("</artifactId>\n");
+            pomContent.append("            <version>").append(dependency.getVersion()).append("</version>\n");
+
+            List<Dependency> exclusions = dependency.getExclusionDependency();
+            if (!exclusions.isEmpty()) {
+                pomContent.append("            <exclusions>\n");
+                for (Dependency exclusion : exclusions) {
+                    pomContent.append("                <exclusion>\n");
+                    pomContent.append("                    <groupId>").append(exclusion.getGroupId()).append("</groupId>\n");
+                    pomContent.append("                    <artifactId>").append(exclusion.getArtifactId()).append("</artifactId>\n");
+                    pomContent.append("                </exclusion>\n");
+                }
+                pomContent.append("            </exclusions>\n");
+            }
+
+            pomContent.append("        </dependency>\n");
+        }
+
+        pomContent.append("    </dependencies>\n\n");
+        pomContent.append("</project>");
+
+        try {
+            FileWriter writer = new FileWriter(filePath);
+            writer.write(pomContent.toString());
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
 }

@@ -1,9 +1,5 @@
 package core;
 
-import depModel.Dependency;
-
-import java.util.List;
-
 public class Main {
     // 程序入口
     public static void main(String[] args) {
@@ -20,11 +16,15 @@ public class Main {
             init.inputType();
         }
         // 创建单模块解析
-        SingleModule singleModule = new SingleModule(init.getFilePath());
+        SingleModule singleModule = new SingleModule();
         try {
             singleModule.getSingleUpgradeSolutions(init.getFilePath(), init.getType());
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+
+        // 前台返回 选择的方案id
+        init.inputId();
+        singleModule.getUpgradedPom(init.getId());
     }
 }
