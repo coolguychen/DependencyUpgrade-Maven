@@ -27,7 +27,7 @@ public class DependencyTreeGenerator {
             List<Dependency> childDependencyTree = generateDependencyTree(dependencyId, depth + 1);
             dependencyTreeList.addAll(childDependencyTree);
         }
-        // TODO: 2023/10/18 跳出循环时，uodate t_Lib中的depTree 
+        // TODO: 2023/10/18 跳出循环时，uodate t_Lib中的depTree
         return dependencyTreeList;
     }
 
@@ -79,42 +79,42 @@ public class DependencyTreeGenerator {
 //    }
 
     // 定义Library类，包含对应的属性和getter/setter方法
-    public static void main(String[] args) {
-        // 指定库的ID
-        int libId = 32;
-
-        List<Dependency> dependencyTree = generateDependencyTree(libId, 0);
-        System.out.println(dependencyTree);
-        JSONArray dependencies = new JSONArray();
-        for (Dependency d: dependencyTree) {
-            // 创建第一个dependency对象
-            JSONObject dependency1 = new JSONObject();
-            int depLibId = d.getLibId();
-            int depth = d.getDepth();
-            dependency1.put("libId", depLibId);
-            dependency1.put("depth", depth);
-            dependencies.put(dependency1);
-        }
-
-        // 打印输出
-        String jsonString = dependencies.toString();
-        System.out.println(jsonString);
-        // TODO: 2023/10/16 upDATE 数据库对应列
-
-//        List<Dependency> conflictDependencyTree = generateConflictDependencyTree(libId);
-
-        // 打印依赖树
-        System.out.println("Dependency Tree:");
-        for (Dependency lib : dependencyTree) {
-            System.out.println(lib);
-        }
-
-        // 打印冲突依赖关系
-        System.out.println("Conflict Dependency Tree:");
-//        for (Dependency lib : conflictDependencyTree) {
+//    public static void main(String[] args) {
+//        // 指定库的ID
+//        int libId = 32;
+//
+//        List<Dependency> dependencyTree = generateDependencyTree(libId, 0);
+//        System.out.println(dependencyTree);
+//        JSONArray dependencies = new JSONArray();
+//        for (Dependency d: dependencyTree) {
+//            // 创建第一个dependency对象
+//            JSONObject dependency1 = new JSONObject();
+//            int depLibId = d.getLibId();
+//            int depth = d.getDepth();
+//            dependency1.put("libId", depLibId);
+//            dependency1.put("depth", depth);
+//            dependencies.put(dependency1);
+//        }
+//
+//        // 打印输出
+//        String jsonString = dependencies.toString();
+//        System.out.println(jsonString);
+//        // TODO: 2023/10/16 upDATE 数据库对应列
+//
+////        List<Dependency> conflictDependencyTree = generateConflictDependencyTree(libId);
+//
+//        // 打印依赖树
+//        System.out.println("Dependency Tree:");
+//        for (Dependency lib : dependencyTree) {
 //            System.out.println(lib);
 //        }
-
-    }
+//
+//        // 打印冲突依赖关系
+//        System.out.println("Conflict Dependency Tree:");
+////        for (Dependency lib : conflictDependencyTree) {
+////            System.out.println(lib);
+////        }
+//
+//    }
 
 }

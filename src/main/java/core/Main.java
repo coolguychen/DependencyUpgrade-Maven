@@ -27,7 +27,6 @@ public class Main {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-//        singleModule.setDependencySet(list1);
         // TODO: 2023/10/19 先对原项目 进行冲突判断
         boolean isConflictBefore = singleModule.conflictDetectBefore();
         if (!isConflictBefore) {
@@ -44,7 +43,8 @@ public class Main {
 
         // 如果没有无冲突的升级版本
         if (singleModule.getResWithoutConflict().size() != 0) {
-            System.out.println("以下是推荐版本");
+            System.out.println("以下是无冲突的推荐版本");
+            // 将recommend设置为resWithoutConflict
             singleModule.setRecommendDepSet(singleModule.getResWithoutConflict());
         } else {
             System.out.println("以下是调解后的版本");

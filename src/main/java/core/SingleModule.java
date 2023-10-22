@@ -122,9 +122,9 @@ public class SingleModule {
         }
 
         int id = 0;
-        for(List<Dependency> dplist : recommendDepSet) {
-            System.out.println(id ++);
-            for(Dependency d: dplist) {
+        for (List<Dependency> dplist : recommendDepSet) {
+            System.out.println(id++);
+            for (Dependency d : dplist) {
                 d.printDependency();
             }
         }
@@ -370,7 +370,6 @@ public class SingleModule {
         //遍历待冲突调解的结果集合
         for (DependencyTree tree : resToMediate) {
             // TODO: 2023/10/21 初始化一个List
-            List<Dependency> tmpDeps = new ArrayList<>();
             List<Dependency> directDeps = new ArrayList<>();
             //获取冲突依赖的集合
             HashMap<String[], List<Dependency>> conflictMap = tree.getConflictMap();
@@ -403,13 +402,10 @@ public class SingleModule {
                     //定位到与冲突的依赖
                     if (dependency.getGroupId().equals(groupId) && dependency.getArtifactId().equals(artifactId)) {
                         System.out.println("与实际加载的依赖版本进行比较");
-                        //如果实际加载的版本更新
-                        // TODO: 2023/10/21 按version比较
                         if (type == 0) {
                             // 原来加载的 比 冲突的 更新 保留
                             if (dependency.getVersion().compareTo(latestDep.getVersion()) > 0) {
-                                System.out.println("保留原来加载的版本");
-                                // TODO: 2023/10/21  resList不变 将parentDep加入列表
+//                                System.out.println("保留原来加载的版本");
                                 Dependency parent = dependency.getParentDependency();
                                 addParentDepIntoDirectList(directDeps, parent);
                             }
@@ -422,38 +418,75 @@ public class SingleModule {
                                 addParentDepIntoDirectList(directDeps, parent);
                                 if (conflictDepList.size() == 1) {
                                     //如果map里面只有一个特殊处理？
-                                    System.out.println("自动加载这个依赖");
+//                                    System.out.println("自动加载这个依赖");
                                 } else {
                                     for (int i = 0; i < conflictDepList.size() - 1; i++) {
                                         Dependency unLoadDependency = conflictDepList.get(i);
                                         parent = unLoadDependency.getParentDependency();
-                                        // TODO: 2023/10/20 加入parentDependency的exclusion里面
                                         parent.addExclusionDependency(unLoadDependency);
-                                        System.out.print("建议父依赖：");
-                                        parent.printDependency();
-                                        System.out.print("需要exclusion子依赖：");
-                                        unLoadDependency.printDependency();
-                                        // TODO: 2023/10/21 将应该加载的parent(直接依赖)放入directDeps
+//                                        System.out.print("建议父依赖：");
+//                                        parent.printDependency();
+//                                        System.out.print("需要exclusion子依赖：");
+//                                        unLoadDependency.printDependency();
                                         addParentDepIntoDirectList(directDeps, parent);
                                     }
                                 }
                             }
                         } else if (type == 1) {
-                            if (dependency.getVersion().compareTo(latestDep.getVersion()) > 0) {
-                                System.out.println("保留原来加载的版本");
-
+                            // 如果原来加载的比冲突的使用量更大
+                            if (dependency.getUsage().compareTo(latestDep.getUsage()) > 0) {
+//                                System.out.println("保留原来加载的版本");
+                                Dependency parent = dependency.getParentDependency();
+                                addParentDepIntoDirectList(directDeps, parent);
                             } else {
-
+//                                System.out.print("exclusion实际加载的依赖：");
+                                // 首先将项目原本加载的依赖屏蔽
+                                Dependency parent = dependency.getParentDependency();
+                                parent.addExclusionDependency(dependency);
+                                addParentDepIntoDirectList(directDeps, parent);
+                                if (conflictDepList.size() == 1) {
+                                    //如果map里面只有一个特殊处理？
+//                                    System.out.println("自动加载这个依赖");
+                                } else {
+                                    for (int i = 0; i < conflictDepList.size() - 1; i++) {
+                                        Dependency unLoadDependency = conflictDepList.get(i);
+                                        parent = unLoadDependency.getParentDependency();
+                                        parent.addExclusionDependency(unLoadDependency);
+//                                        System.out.print("建议父依赖：");
+//                                        parent.printDependency();
+//                                        System.out.print("需要exclusion子依赖：");
+//                                        unLoadDependency.printDependency();
+                                        addParentDepIntoDirectList(directDeps, parent);
+                                    }
+                                }
                             }
-                        } else if (type == 1) {
-
                         } else if (type == 2) {
                             if (dependency.getVulNum() < dependency.getVulNum()) {
                                 System.out.println("保留原来加载的版本");
+                            } else {
+                                System.out.print("exclusion实际加载的依赖：");
+                                // 首先将项目原本加载的依赖屏蔽
+                                Dependency parent = dependency.getParentDependency();
+                                parent.addExclusionDependency(dependency);
+                                addParentDepIntoDirectList(directDeps, parent);
+                                if (conflictDepList.size() == 1) {
+                                    //如果map里面只有一个特殊处理？
+//                                    System.out.println("自动加载这个依赖");
+                                } else {
+                                    for (int i = 0; i < conflictDepList.size() - 1; i++) {
+                                        Dependency unLoadDependency = conflictDepList.get(i);
+                                        parent = unLoadDependency.getParentDependency();
+                                        parent.addExclusionDependency(unLoadDependency);
+//                                        System.out.print("建议父依赖：");
+//                                        parent.printDependency();
+//                                        System.out.print("需要exclusion子依赖：");
+//                                        unLoadDependency.printDependency();
+                                        addParentDepIntoDirectList(directDeps, parent);
+                                    }
+                                }
                             }
                         }
-                    }
-                    else{
+                    } else {
                         // 其他的 加入直接依赖即可
                         Dependency parent = dependency.getParentDependency();
                         addParentDepIntoDirectList(directDeps, parent);
@@ -466,18 +499,18 @@ public class SingleModule {
         }
     }
 
-    public List<Dependency> addParentDepIntoDirectList(List<Dependency> directDeps, Dependency parent){
-        if(directDeps.size() != 0) {
+    public List<Dependency> addParentDepIntoDirectList(List<Dependency> directDeps, Dependency parent) {
+        if (directDeps.size() != 0) {
             boolean exist = false;
-            for(Dependency d: directDeps) {
+            for (Dependency d : directDeps) {
                 // directDeps里面已经存在这个直接依赖了
-                if(d.getGroupId().equals(parent.getGroupId()) && d.getArtifactId().equals(parent.getArtifactId())
+                if (d.getGroupId().equals(parent.getGroupId()) && d.getArtifactId().equals(parent.getArtifactId())
                         && d.getVersion().equals(parent.getVersion())) {
                     exist = true; //标为存在
                     break;
                 }
             }
-            if(!exist) {
+            if (!exist) {
                 // 说明不存在 加入
                 directDeps.add(parent);
             }

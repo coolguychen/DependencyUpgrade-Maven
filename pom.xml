@@ -104,7 +104,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>Main</mainClass>
+                            <mainClass>core.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

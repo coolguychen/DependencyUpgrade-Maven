@@ -127,7 +127,7 @@ public class DependencyTree {
             Process process = runtime.exec(new String[]{"cmd", "/c", "mvn dependency:tree -Dverbose > tree.txt"}, null, new File(rootPath));
             //等待线程运行结束
             process.waitFor();
-            System.out.println("构造完毕，输出tree.txt");
+//            System.out.println("构造完毕，输出tree.txt");
 //            printTree(rootPath + "/tree.txt");
         } catch (IOException e) {
             e.printStackTrace();
@@ -135,6 +135,7 @@ public class DependencyTree {
             e.printStackTrace();
         }
     }
+
 
     /**
      * 打印tree.txt中的信息
