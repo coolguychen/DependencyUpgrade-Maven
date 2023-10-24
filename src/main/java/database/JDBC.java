@@ -159,6 +159,13 @@ public class JDBC {
         return libInfo;
     }
 
+    /**
+     * 获取libId
+     * @param groupId
+     * @param artifactId
+     * @param version
+     * @return
+     */
     public int getLibId(String groupId, String artifactId, String version){
         try {
             String sql = "SELECT libId FROM t_lib WHERE groupId = \"" +  groupId + "\""  +
@@ -220,7 +227,6 @@ public class JDBC {
         }
     }
 
-    // TODO: 2023/10/9 将CVE_id与lib_id对应。 
     public void insertIntoT_lib_vul(int lib_id, String CVE_id){
         try {
             String sql = "insert into t_lib_vulnerability (libId, vno) values " +
@@ -241,6 +247,30 @@ public class JDBC {
             se.printStackTrace();
         }
     }
+
+    // TODO: 2023/10/24 获取某一个Lib的全部CVE
+
+    /**
+     * 返回该lib下对应的所有CVEs
+     * @param libId
+     * @return
+     */
+    public List<String> getCVEOfLib(int libId){
+        List<String> vuls = new ArrayList<>();
+        try{
+            String sql = "SELECT lDISTINCT(vno) FROM t_lib_vulnerability WHERE libId = " + libId;
+            Statement stmt = conn.createStatement();
+            resultSet = stmt.executeQuery(sql);
+            while (resultSet.next()) {
+                String CVE = resultSet.getString("vno");
+                vuls.add(CVE);
+            }
+        }catch (SQLException e){
+
+        }
+        return vuls;
+    }
+
 
     public void insertLinkIntoT_lib(String groupId, String artifactId, String version, String usages, String publish_date, String libLink){
         if (queryFromT_lib(groupId, artifactId, version) == true) {
@@ -448,22 +478,9 @@ public class JDBC {
         } catch (Exception e) {
             // 处理 Class.forName 错误
             e.printStackTrace();
-        } finally {
-            // 关闭资源
-//            try {
-//                if (stmt != null) stmt.close();
-//            } catch (SQLException se2) {
-//            }
-//            try {
-//                if (conn != null) conn.close();
-//            } catch (SQLException se) {
-//                se.printStackTrace();
-//            }
         }
         return false;
     }
-
-    // TODO: 2023/10/11 获取libId下对应的所有依赖
 
     /**
      * 获取libId下对应的所有依赖
@@ -525,13 +542,14 @@ public class JDBC {
         List<Dependency> depList = new ArrayList<>();
         // TODO: 2023/10/19 如果该lib 不存在 就要爬取
 
-        // TODO: 2023/10/19 如果存在
+        // TODO: 2023/10/19 如果存在 取30个
         try{
             String sql = "SELECT * FROM t_lib WHERE groupId = " + "\"" + groupId + "\"" + "AND " + "artifactId = " + "\"" + artifactId +"\"";
             stmt = conn.createStatement();
             //执行插入语句
             resultSet = stmt.executeQuery(sql);
             // 遍历结果集
+            int cnt = 1;
             while (resultSet.next()) {
                 String version = resultSet.getString("version");
                 String usage = resultSet.getString("usages");
@@ -539,10 +557,16 @@ public class JDBC {
                 String publishDate = resultSet.getString("publishDate");
                 Dependency d = new Dependency(groupId, artifactId, version, vulCount, usage, publishDate);
                 depList.add(d);
+                cnt++;
+                if(cnt > 30) break;
             }
         }catch (SQLException e) {
 
         }
         return depList;
+    }
+
+    public void crawlLib(String groupId, String artifactId){
+
     }
 }

@@ -25,10 +25,11 @@ public class Dependency {
     private Dependency parentDependency;
 
     private List<Dependency> exclusionDependency = new ArrayList<>(); // 是否存在被排除的依赖
+
+    private List<String> vulnerabilities = new ArrayList<>();
+
     private List<String> higherVersions; //该依赖对应的更高版本
-    private List<Dependency> higherList; //该依赖对应的更高依赖的集合
-    //间接依赖
-    private List<Dependency> subDependency;
+
 
     public Dependency(int libId, int depth) {
         this.libId = libId;
@@ -63,10 +64,6 @@ public class Dependency {
         this.publishDate = publishDate;
         this.depth = depth;
         this.parentDependency = parentDependency;
-    }
-
-    public List<String> getHigherVersions() {
-        return higherVersions;
     }
 
     public int getLibId() {
@@ -105,26 +102,6 @@ public class Dependency {
         this.exclusionDependency.add(exclusion);
     }
 
-    /**
-     * 构造函数
-     *
-     * @param id               记为出现的顺序
-     * @param groupId
-     * @param artifactId
-     * @param version
-     * @param depth            深度
-     * @param parentDependency 父依赖是谁
-     */
-//    public Dependency(int id, String groupId, String artifactId, String version, int depth, Dependency parentDependency) {
-//        this.id = id;
-//        this.groupId = groupId;
-//        this.artifactId = artifactId;
-//        this.version = version;
-//        this.depth = depth;
-//        this.parentDependency = parentDependency;
-//    }
-
-
     public Dependency(int libId, String groupId, String artifactId, String version, int vulNum, String usage, String publishDate) {
         this.libId = libId;
         this.groupId = groupId;
@@ -146,7 +123,6 @@ public class Dependency {
         this.groupId = groupId;
         this.artifactId = artifactId;
         this.version = version;
-        this.higherList = new ArrayList<>();
         this.higherVersions = new ArrayList<>();
         //把当前依赖的版本加进去
         this.higherVersions.add(version);
@@ -168,8 +144,12 @@ public class Dependency {
         return version;
     }
 
-    public List<Dependency> getSubDependency() {
-        return subDependency;
+    public List<String> getVulnerabilities() {
+        return vulnerabilities;
+    }
+
+    public void setVulnerabilities(List<String> vulnerabilities) {
+        this.vulnerabilities = vulnerabilities;
     }
 
     public int getId() {

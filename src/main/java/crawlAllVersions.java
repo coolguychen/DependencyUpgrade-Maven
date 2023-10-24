@@ -10,8 +10,6 @@ import java.io.IOException;
 import java.util.List;
 
 public class crawlAllVersions {
-
-    // TODO: 2023/10/7 遍历数据库中的artifact，获取他们的详情
     public static void main(String[] args) {
         JDBC jdbc = new JDBC();
         List<String[]> artifactLinks = jdbc.queryFromT_artifact();
@@ -84,5 +82,4 @@ public class crawlAllVersions {
 
     }
 
-// TODO: 2023/10/7
 }

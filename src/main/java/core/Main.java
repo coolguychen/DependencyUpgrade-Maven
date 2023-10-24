@@ -18,6 +18,8 @@ public class Main {
         // 创建单模块解析
         SingleModule singleModule = new SingleModule();
         try {
+            // 先获取全部依赖列表
+            singleModule.getLibsFromPom(init.getFilePath());
             singleModule.getSingleUpgradeSolutions(init.getFilePath(), init.getType());
         } catch (InterruptedException e) {
             throw new RuntimeException(e);

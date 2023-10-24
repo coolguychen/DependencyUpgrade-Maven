@@ -42,17 +42,14 @@ public class crawlAllVersionDetails {
                     for (Element v : vuls) {
                         CVE_id = v.text();
                         if (CVE_id.contains("CVE")) {
-                            // TODO: 2023/10/10 若数据库中不存在该CVE, 将CVE信息插入t_vul
                             if (!jdbc.queryFromT_vul(CVE_id)) {
                                 jdbc.insertIntoT_vul(CVE_id);
                             }
-                            // TODO: libid和vno的对应
                             jdbc.insertIntoT_lib_vul(libId, CVE_id);
                         }
                     }
                 }
 
-                // TODO: 获取传递依赖，赋值给c_deps
                 String c_deps = "";
                 Elements tables = doc.body().getElementsByClass("version-section");
                 String compile = tables.get(0).getElementsByTag("h2").text();
@@ -148,7 +145,6 @@ public class crawlAllVersionDetails {
 //                }
 //            }
 //
-//            // TODO: 获取传递依赖，赋值给c_deps
 //            String c_deps = "";
 //            Elements tables = doc.body().getElementsByClass("version-section");
 //            String compile = tables.get(0).getElementsByTag("h2").text();
@@ -192,7 +188,6 @@ public class crawlAllVersionDetails {
 //                    }
 //                }
 //            }
-//            // TODO: 2023/10/10 解析完了之后，将对应lib标为accessed
 //            jdbc.updateLibAccess(libId, 1);
 //        } else {
 //            System.out.println("网页获取失败,404");

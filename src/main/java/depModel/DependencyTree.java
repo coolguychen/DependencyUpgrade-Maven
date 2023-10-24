@@ -76,44 +76,6 @@ public class DependencyTree {
         return isConflict;
     }
 
-    /**
-     * 遍历结点 并打印. 同时按每个结点所在深度 在结点前打印不同长度的空格
-     *
-     * @param changeNode 根结点
-     * @param depth      结点深度：1
-     */
-    public void queryAll(Dependency changeNode, int depth) {
-        List<Dependency> sonList = changeNode.getSubDependency();
-        String space = generateSpace(depth - 1);    //根据深度depth,返回(depth*3)长度的空格
-
-        if (sonList == null || sonList.isEmpty()) {
-            return;
-        }
-
-        for (int i = 0; i < sonList.size(); i++) {
-            System.out.println(space + "--"      //打印空格 和结点id，name
-                    + "<" + sonList.get(i).getGroupId() + ">"
-                    + "<" + sonList.get(i).getArtifactId() + ">"
-                    + "<" + sonList.get(i).getVersion() + ">"
-            );
-
-            if (i == 0) {
-                depth = depth + 1;  //结点深度+1，每个for循环仅执行一次。作为子结点sonList.get(i)的深度
-            }
-            queryAll(sonList.get(i), depth);
-        }
-
-    }
-
-    //打印空格
-    public static String generateSpace(int count) {
-        count = count * 2;
-        char[] chs = new char[count];
-        for (int i = 0; i < count; i++) {
-            chs[i] = ' ';
-        }
-        return new String(chs);
-    }
 
     /**
      * 根据pom文件执行命令行：mvn dependency:tree -Dverbose生成tree.txt

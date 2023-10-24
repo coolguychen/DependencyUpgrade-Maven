@@ -1,3 +1,4 @@
+core\MultipleModule$1.class
 util\UserAgentUtil.class
 core\RecommendSolution$1.class
 core\RecommendSolution$2.class
@@ -13,7 +14,8 @@ depModel\Dependency.class
 util\HttpUtil.class
 core\Main.class
 core\Init.class
-core\PomParser.class
+core\CustomizedSingleModule.class
 core\DependencyTreeGenerator.class
+core\MultipleModule.class
 depModel\DependencyTree.class
 database\JDBC.class

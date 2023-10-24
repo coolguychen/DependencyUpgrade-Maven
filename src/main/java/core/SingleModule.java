@@ -13,9 +13,7 @@ import java.util.*;
 
 public class SingleModule {
     //单模块处理方案
-
     //输入的项目路径
-    // TODO: 2023/10/21 project path, 远程服务器上的目录 
     private static String projectPath;
     //项目路径下的pom文件路径
     private static String pomPath;
@@ -44,7 +42,7 @@ public class SingleModule {
         SingleModule.type = type;
     }
 
-    private static int type;
+    protected static int type;
 
     JDBC jdbc = new JDBC();
 
@@ -60,7 +58,7 @@ public class SingleModule {
     }
 
     //解析出来的项目的依赖的集合
-    private List<Dependency> dependencySet = new ArrayList<>();
+    protected List<Dependency> dependencySet = new ArrayList<>();
 
     public List<Dependency> getDependencySet() {
         return dependencySet;
@@ -71,14 +69,14 @@ public class SingleModule {
     }
 
     //得到的依赖升级版本的结果集合
-    private List<List<Dependency>> resultSet = new ArrayList<>();
+    protected List<List<Dependency>> resultSet = new ArrayList<>();
 
     //无冲突的结果集
-    private List<List<Dependency>> resWithoutConflict = new ArrayList<>();
+    protected List<List<Dependency>> resWithoutConflict = new ArrayList<>();
 
 
     //需要调解/升级的结果集
-    private List<DependencyTree> resToMediate = new ArrayList<>();
+    protected List<DependencyTree> resToMediate = new ArrayList<>();
 
     private List<DependencyTree> resAfterMediate = new ArrayList<>();
 
@@ -103,7 +101,7 @@ public class SingleModule {
     }
 
     //propertyMap
-    private static Map<String, String> propertyMap = new HashMap<>();
+    protected static Map<String, String> propertyMap = new HashMap<>();
 
     public static List<List<Dependency>> getRecommendDepSet() {
         return recommendDepSet;
@@ -114,14 +112,13 @@ public class SingleModule {
     }
 
     // 推荐的结果
-    private static List<List<Dependency>> recommendDepSet = new ArrayList<>();
+    protected static List<List<Dependency>> recommendDepSet = new ArrayList<>();
 
     public static void main(String[] args) throws InterruptedException {
         type = 0;
         SingleModule singleModule = new SingleModule("D:\\1javawork\\Third Party Libraries\\TestDemo", 0);
         singleModule.parsePom();
-//        singleModule.setDependencySet(list1);
-        // TODO: 2023/10/19 先对原项目 进行冲突判断
+        // T先对原项目 进行冲突判断
         boolean isConflictBefore = singleModule.conflictDetectBefore();
         if (!isConflictBefore) {
             //如果原项目没有冲突，加入无冲突集合
@@ -141,8 +138,6 @@ public class SingleModule {
             recommendDepSet = singleModule.resWithoutConflict;
         } else {
             System.out.println("以下是调解后的版本");
-//            recommend ;
-//            recommend =
         }
 
         int id = 0;
@@ -169,7 +164,8 @@ public class SingleModule {
         setProjectPath(projectPath);
         setType(type);
         setPomPath(projectPath+"/pom.xml");
-        parsePom();
+//        parsePom();
+//        getLibsFromPom(projectPath);
         // TODO: 2023/10/19 先对原项目 进行冲突判断
         boolean isConflictBefore = conflictDetectBefore();
         if (!isConflictBefore) {
@@ -203,12 +199,34 @@ public class SingleModule {
         return recommendDepSet;
     }
 
+    /**
+     * 根据pom.xml 生成 依赖列表
+     * @return 返回依赖列表 （groupId, artifactId, version, List<String> vulnerabilities）
+     */
+    public List<Dependency> getLibsFromPom(String projectPath) {
+        // 设定目录 & type
+        setProjectPath(projectPath);
+        setPomPath(projectPath+"/pom.xml");
+        try {
+            // 先解析pom.xml
+            parsePom();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        for(Dependency d: dependencySet) {
+            int libId = jdbc.getLibId(d.getGroupId(),d.getArtifactId(),d.getVersion());
+            List<String> vuls = jdbc.getCVEOfLib(libId);
+            d.setVulnerabilities(vuls);
+        }
+        return dependencySet;
+    }
+
 
     /**
      * 通过项目的pom文件得到依赖。
      */
     public void parsePom() throws InterruptedException {
-//        dependencySet = new DependencySet();
+        dependencySet = new ArrayList<>();
         System.out.println("解析" + pomPath + "结果中...");
         SAXReader sr = new SAXReader();
         try {
@@ -229,7 +247,6 @@ public class SingleModule {
 //                System.out.println("groupId为：" + groupId);
                     String artifactId = dependency.element("artifactId").getText();
 //                System.out.println("artifactId为："+artifactId);
-                    // TODO: 4/2/2023 关于${version}的解析
                     Element version_ele = dependency.element("version");
 //                System.out.println("版本号为：" + version);
                     if (version_ele != null) {
@@ -237,7 +254,7 @@ public class SingleModule {
                         if (version.contains("${project.version}")) {
 //                                System.out.println("为本地模块，不考虑");
                         } else if (version.contains("$")) {
-                            // TODO: 4/2/2023 关于${version}的解析
+                            // 关于${version}的解析
                             // 获取{}中间的元素，在propertyMap中寻找对应
                             version = version.substring(version.indexOf("{"), version.indexOf("}"));
                             version = propertyMap.get(version);
@@ -360,7 +377,10 @@ public class SingleModule {
     }
 
 
-
+    /**
+     * 在给出升级方案之前，先判断原项目有无冲突。
+     * @return 有-true， 无-false
+     */
     public boolean conflictDetectBefore() {
         DependencyTree dependencyTree = new DependencyTree();
         IOUtil ioUtil = new IOUtil();
@@ -369,7 +389,6 @@ public class SingleModule {
         ioUtil.copyFile(pomPath, backUpPath);
         dependencyTree.constructTree(projectPath);
 //        dependencyTree.constructTree(projectPath);
-        // TODO: 2023/10/20 生成pom文件的路径，能否设置为远程？
         dependencyTree.parseTree(projectPath + "/tree.txt");
         //恢复原来的pom文件
         ioUtil.copyFile(backUpPath, pomPath);
@@ -417,11 +436,15 @@ public class SingleModule {
         }
     }
 
+    /**
+     * 冲突的调解。
+     * 如果候选集都是有冲突的，
+     * 就进行冲突调解，保证不出现同一个库的不同版本
+     */
     public void conflictMediation() {
         RecommendSolution solution = new RecommendSolution();
         //遍历待冲突调解的结果集合
         for (DependencyTree tree : resToMediate) {
-            // TODO: 2023/10/21 初始化一个List
             List<Dependency> directDeps = new ArrayList<>();
             //获取冲突依赖的集合
             HashMap<String[], List<Dependency>> conflictMap = tree.getConflictMap();
@@ -432,15 +455,15 @@ public class SingleModule {
                 String artifactId = conflictDepList.get(0).getArtifactId();
                 //编写比较器 对象按照version从小到大
                 if (type == 0) {
-                    // TODO: 2023/10/20 按照date
+                    // 按照date
                     solution.sortByDate(conflictDepList);
 
                 } else if (type == 1) {
-                    // TODO: 2023/10/20 按照usage
+                    // 按照usage
                     solution.sortByUsage(conflictDepList);
 
                 } else if (type == 2) {
-                    // TODO: 2023/10/20 按照vulNum
+                    // 按照vulNum
                     solution.sortByVulNums(conflictDepList);
 
                 }
@@ -572,7 +595,7 @@ public class SingleModule {
         return directDeps;
     }
 
-    // TODO: 2023/10/22 根据选择的方案 生成 pom文件
+    // 根据选择的方案 生成 pom文件
     public void getUpgradedPom(int id) {
         // 获取推荐的依赖列表
         List<Dependency> recommend = recommendDepSet.get(id);
@@ -582,4 +605,6 @@ public class SingleModule {
         ioUtil.copyFile(pomPath, newPomPath); // 先复制原来的到pomPath
         ioUtil.modifyDependenciesXml(newPomPath, recommend);
     }
+
+
 }
