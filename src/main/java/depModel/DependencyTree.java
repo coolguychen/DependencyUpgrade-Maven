@@ -183,25 +183,20 @@ public class DependencyTree {
                     if (depth == 0) {
                         parentDependency = new Dependency(groupId, artifactId, version);
                     }
-                    // TODO: 2023/10/21 查看该库在db中是否存在
                     String date = "";
                     String usage = "";
                     int vulNum = 0;
                     JDBC jdbc = new JDBC();
+                    // getLibID z这一步 确保t_lib中有这个库的信息
                     int libId = jdbc.getLibId(groupId, artifactId, version);
                     if (libId != 0) {
-                        // libId不为0，说明存在DB中，获取detail
+                        // libId不为0，说明存在db中，获取detail
                         Dependency d = jdbc.getLibDetail(libId);
                         date = d.getPublishDate();
                         vulNum = d.getVulNum();
                         usage = d.getUsage();
-                    } else {
-                        // TODO: 2023/10/21 爬取
                     }
-
-
                     if (conflict == true) {
-
                         Dependency conflictDependency = new Dependency(cnt++, groupId, artifactId, version, vulNum, usage, date, depth, parentDependency);
                         //判断该依赖是否已经存在于map中
                         if (conflictMap.containsKey(key)) {

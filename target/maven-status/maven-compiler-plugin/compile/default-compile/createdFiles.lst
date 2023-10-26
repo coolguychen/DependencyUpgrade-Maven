@@ -3,13 +3,11 @@ util\UserAgentUtil.class
 core\RecommendSolution$1.class
 core\RecommendSolution$2.class
 core\RecommendSolution.class
-crawlAllVersionDetails.class
 core\RecommendSolution$3.class
 util\HttpUtil$1.class
 util\IOUtil.class
 core\SingleModule.class
 util\RandomUtil.class
-crawlAllVersions.class
 depModel\Dependency.class
 util\HttpUtil.class
 core\Main.class

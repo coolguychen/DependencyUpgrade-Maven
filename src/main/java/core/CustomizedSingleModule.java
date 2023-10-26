@@ -139,7 +139,7 @@ public class CustomizedSingleModule extends SingleModule {
 
 
     /**
-     * 入口
+     * 版本约束的推荐的入口
      * @param projectPath
      * @param type
      * @param groupId
@@ -148,7 +148,9 @@ public class CustomizedSingleModule extends SingleModule {
      * @param version
      * @return
      */
-    public List<List<Dependency>> getCustomizedUpgradeSolutions(String projectPath, int type, String groupId, String artifactId, String opr, String version) {
+    public List<List<Dependency>> getCustomizedUpgradeSolutions(String projectPath, int type,
+                                                                String groupId, String artifactId,
+                                                                String opr, String version) {
         // 首先 set等等
         setProjectPath(projectPath);
         setType(type);
@@ -199,7 +201,6 @@ public class CustomizedSingleModule extends SingleModule {
             String groupId = d.getGroupId();
             String artifactId = d.getArtifactId();
             // TODO: 2023/10/24 如果是用户自定义的偏好推荐
-
             if(groupId.equals(selectedGroupId) && artifactId.equals(selectedArtifactId)) {
                 // 先获取groupId + artifactId 下的全部版本
                 allVersions = jdbc.getLibAllVersions(selectedGroupId, selectedArtifactId);

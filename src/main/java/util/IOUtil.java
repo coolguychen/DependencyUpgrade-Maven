@@ -107,7 +107,6 @@ public class IOUtil {
      * @param pomPath
      * @param dependencyList
      */
-    // TODO: 2023/10/21  如果有exclusion
     public static void modifyDependenciesXml(String pomPath, List<Dependency> dependencyList) {
         CountDownLatch latch = new CountDownLatch(1);
 

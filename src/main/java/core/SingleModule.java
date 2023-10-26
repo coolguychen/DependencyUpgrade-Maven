@@ -115,7 +115,6 @@ public class SingleModule {
     protected static List<List<Dependency>> recommendDepSet = new ArrayList<>();
 
     public static void main(String[] args) throws InterruptedException {
-        type = 0;
         SingleModule singleModule = new SingleModule("D:\\1javawork\\Third Party Libraries\\TestDemo", 0);
         singleModule.parsePom();
         // T先对原项目 进行冲突判断
@@ -260,6 +259,7 @@ public class SingleModule {
                             version = propertyMap.get(version);
                             //新建一个Dependency
                             Dependency d = new Dependency(groupId, artifactId, version);
+
                             //添加到项目依赖列表里面
                             dependencySet.add(d);
                         } else {
@@ -300,15 +300,14 @@ public class SingleModule {
      * @param dependencySet pom文件解析后得到的dependencySet
      */
     public void singleModuleUpgrade(List<Dependency> dependencySet) {
-        RecommendSolution solution = new RecommendSolution();
-        // TODO: 2023/10/18 根据传入的参数选择如何推荐
-        List<List<Dependency>> resultToBeSorted = new ArrayList<>();
-        // 遍历pom文件的所有依赖：
-        for (Dependency d : dependencySet) {
-            String groupId = d.getGroupId();
-            String artifactId = d.getArtifactId();
-            //在t_lib中找到这个依赖的组合
-            List<Dependency> allVersions = jdbc.getLibAllVersions(groupId, artifactId);
+                RecommendSolution solution = new RecommendSolution();
+                List<List<Dependency>> resultToBeSorted = new ArrayList<>();
+                // 遍历pom文件的所有依赖：
+                for (Dependency d : dependencySet) {
+                    String groupId = d.getGroupId();
+                    String artifactId = d.getArtifactId();
+                    //在t_lib中找到这个依赖的组合
+                    List<Dependency> allVersions = jdbc.getLibAllVersions(groupId, artifactId);
 //            resultTo.add(allVersions);
             List<Dependency> sortedVersions = new ArrayList<>();
             if (type == 0) {
