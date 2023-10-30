@@ -2,9 +2,7 @@ package core;
 
 import depModel.Dependency;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import org.apache.maven.artifact.versioning.ComparableVersion;
 
@@ -51,6 +49,15 @@ public class CustomizedSingleModule extends SingleModule {
     }
 
     public CustomizedSingleModule() {
+        super();
+        selectedGroupId = "";
+        selectedArtifactId = "";
+        selectedVersion = "";
+        opr = "";
+        recommendDepSet = new ArrayList<>();
+        resToMediate = new ArrayList<>();
+        resWithoutConflict = new ArrayList<>();
+        resultSet = new ArrayList<>();
     }
 
     public CustomizedSingleModule(String path, int _type) {
@@ -60,7 +67,8 @@ public class CustomizedSingleModule extends SingleModule {
     public static void main(String[] args) {
         CustomizedSingleModule singleModule = new CustomizedSingleModule();
         //先解析pom文件，得到getLibsFromPom
-        singleModule.getLibsFromPom("D:\\1javawork\\singleModuleDemo");
+        List<Dependency> list = singleModule.getLibsFromPom("D:\\1javawork\\Third Party Libraries\\TestDemo");
+        singleModule.getAllVerisonsOfAllLib();
         singleModule.getCustomizedUpgradeSolutions("D:\\1javawork\\singleModuleDemo",0,"log4j","log4j", "=","1.2.16");
         singleModule.getUpgradedPom(0);
     }
@@ -80,6 +88,16 @@ public class CustomizedSingleModule extends SingleModule {
             versionList.add(d.getVersion());
         }
         return versionList;
+    }
+
+    public Map<String, List<String>> getAllVerisonsOfAllLib(){
+        Map<String, List<String>> versionMap = new HashMap<>();
+        for(Dependency d: dependencySet) {
+            List<String> versions = getAllVersions(d.getGroupId(), d.getArtifactId());
+            String key = d.getGroupId() + ":" + d.getArtifactId();
+            versionMap.put(key, versions);
+        }
+        return versionMap;
     }
 
 
@@ -159,6 +177,7 @@ public class CustomizedSingleModule extends SingleModule {
         setSelectedArtifactId(artifactId);
         setSelectedVersion(version);
         setOpr(opr);
+        recommendDepSet = new ArrayList<>(); //初始化recommendDepset
         boolean isConflictBefore = conflictDetectBefore();
         if (!isConflictBefore) {
             //如果原项目没有冲突，加入无冲突集合

@@ -48,17 +48,27 @@ public class SingleModule {
 
     //构造函数
     public SingleModule() {
-
+        // 初始化这些文件
+        recommendDepSet = new ArrayList<>();
+        resToMediate = new ArrayList<>();
+        resWithoutConflict = new ArrayList<>();
+        resultSet = new ArrayList<>();
+        resAfterMediate = new ArrayList<>();
     }
 
     public SingleModule(String path, int _type) {
         projectPath = path;
         pomPath = path + "/pom.xml";
         type = _type;
+        recommendDepSet = new ArrayList<>();
+        resToMediate = new ArrayList<>();
+        resWithoutConflict = new ArrayList<>();
+        resultSet = new ArrayList<>();
+        resAfterMediate = new ArrayList<>();
     }
 
     //解析出来的项目的依赖的集合
-    protected List<Dependency> dependencySet = new ArrayList<>();
+    protected List<Dependency> dependencySet;
 
     public List<Dependency> getDependencySet() {
         return dependencySet;
@@ -69,16 +79,15 @@ public class SingleModule {
     }
 
     //得到的依赖升级版本的结果集合
-    protected List<List<Dependency>> resultSet = new ArrayList<>();
+    protected List<List<Dependency>> resultSet;
 
     //无冲突的结果集
-    protected List<List<Dependency>> resWithoutConflict = new ArrayList<>();
-
+    protected List<List<Dependency>> resWithoutConflict;
 
     //需要调解/升级的结果集
-    protected List<DependencyTree> resToMediate = new ArrayList<>();
+    protected List<DependencyTree> resToMediate;
 
-    private List<DependencyTree> resAfterMediate = new ArrayList<>();
+    protected List<DependencyTree> resAfterMediate;
 
     public List<DependencyTree> getResAfterMediate() {
         return resAfterMediate;
@@ -101,18 +110,18 @@ public class SingleModule {
     }
 
     //propertyMap
-    protected static Map<String, String> propertyMap = new HashMap<>();
+    protected Map<String, String> propertyMap = new HashMap<>();
 
-    public static List<List<Dependency>> getRecommendDepSet() {
+    public List<List<Dependency>> getRecommendDepSet() {
         return recommendDepSet;
     }
 
-    public static void setRecommendDepSet(List<List<Dependency>> recommendDepSet) {
-        SingleModule.recommendDepSet = recommendDepSet;
+    public void setRecommendDepSet(List<List<Dependency>> recommendDepSet) {
+        this.recommendDepSet = recommendDepSet;
     }
 
     // 推荐的结果
-    protected static List<List<Dependency>> recommendDepSet = new ArrayList<>();
+    protected List<List<Dependency>> recommendDepSet;
 
     public static void main(String[] args) throws InterruptedException {
         SingleModule singleModule = new SingleModule("D:\\1javawork\\Third Party Libraries\\TestDemo", 0);
@@ -134,13 +143,14 @@ public class SingleModule {
         // 如果没有无冲突的升级版本
         if (singleModule.resWithoutConflict.size() != 0) {
             System.out.println("以下是推荐版本");
-            recommendDepSet = singleModule.resWithoutConflict;
-        } else {
+//            setRecommendde
+            singleModule.setRecommendDepSet(singleModule.resWithoutConflict);
+         } else {
             System.out.println("以下是调解后的版本");
         }
 
         int id = 0;
-        for (List<Dependency> dplist : recommendDepSet) {
+        for (List<Dependency> dplist : singleModule.recommendDepSet) {
             System.out.println(id++);
             for (Dependency d : dplist) {
                 d.printDependency();
@@ -151,21 +161,21 @@ public class SingleModule {
 
     /**
      * 获取单模块项目的可升级方案
+     *
      * @param projectPath 给定一个项目路径
-     * @param type 0表示按照发行时间新的推荐，
-     * 1表示按照使用量多的推荐，
-     * 2表示按照漏洞数少的推荐
-     * @return List<List<Dependency>> 推荐方案的列表
+     * @param type        0表示按照发行时间新的推荐，
+     *                    1表示按照使用量多的推荐，
+     *                    2表示按照漏洞数少的推荐
+     * @return List<List < Dependency>> 推荐方案的列表
      * @throws InterruptedException
      */
     public List<List<Dependency>> getSingleUpgradeSolutions(String projectPath, int type) throws InterruptedException {
         // 设定目录 & type
         setProjectPath(projectPath);
         setType(type);
-        setPomPath(projectPath+"/pom.xml");
-//        parsePom();
-//        getLibsFromPom(projectPath);
-        // TODO: 2023/10/19 先对原项目 进行冲突判断
+        setPomPath(projectPath + "/pom.xml");
+        recommendDepSet = new ArrayList<>(); //初始化recommendDepset
+        // 先对原项目 进行冲突判断
         boolean isConflictBefore = conflictDetectBefore();
         if (!isConflictBefore) {
             //如果原项目没有冲突，加入无冲突集合
@@ -189,9 +199,9 @@ public class SingleModule {
         }
 
         int id = 0;
-        for(List<Dependency> dplist : recommendDepSet) {
-            System.out.println(id ++);
-            for(Dependency d: dplist) {
+        for (List<Dependency> dplist : recommendDepSet) {
+            System.out.println(id++);
+            for (Dependency d : dplist) {
                 d.printDependency();
             }
         }
@@ -200,20 +210,21 @@ public class SingleModule {
 
     /**
      * 根据pom.xml 生成 依赖列表
+     *
      * @return 返回依赖列表 （groupId, artifactId, version, List<String> vulnerabilities）
      */
     public List<Dependency> getLibsFromPom(String projectPath) {
         // 设定目录 & type
         setProjectPath(projectPath);
-        setPomPath(projectPath+"/pom.xml");
+        setPomPath(projectPath + "/pom.xml");
         try {
             // 先解析pom.xml
             parsePom();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        for(Dependency d: dependencySet) {
-            int libId = jdbc.getLibId(d.getGroupId(),d.getArtifactId(),d.getVersion());
+        for (Dependency d : dependencySet) {
+            int libId = jdbc.getLibId(d.getGroupId(), d.getArtifactId(), d.getVersion());
             List<String> vuls = jdbc.getCVEOfLib(libId);
             d.setVulnerabilities(vuls);
         }
@@ -300,14 +311,14 @@ public class SingleModule {
      * @param dependencySet pom文件解析后得到的dependencySet
      */
     public void singleModuleUpgrade(List<Dependency> dependencySet) {
-                RecommendSolution solution = new RecommendSolution();
-                List<List<Dependency>> resultToBeSorted = new ArrayList<>();
-                // 遍历pom文件的所有依赖：
-                for (Dependency d : dependencySet) {
-                    String groupId = d.getGroupId();
-                    String artifactId = d.getArtifactId();
-                    //在t_lib中找到这个依赖的组合
-                    List<Dependency> allVersions = jdbc.getLibAllVersions(groupId, artifactId);
+        RecommendSolution solution = new RecommendSolution();
+        List<List<Dependency>> resultToBeSorted = new ArrayList<>();
+        // 遍历pom文件的所有依赖：
+        for (Dependency d : dependencySet) {
+            String groupId = d.getGroupId();
+            String artifactId = d.getArtifactId();
+            //在t_lib中找到这个依赖的组合
+            List<Dependency> allVersions = jdbc.getLibAllVersions(groupId, artifactId);
 //            resultTo.add(allVersions);
             List<Dependency> sortedVersions = new ArrayList<>();
             if (type == 0) {
@@ -378,6 +389,7 @@ public class SingleModule {
 
     /**
      * 在给出升级方案之前，先判断原项目有无冲突。
+     *
      * @return 有-true， 无-false
      */
     public boolean conflictDetectBefore() {
@@ -498,10 +510,6 @@ public class SingleModule {
                                         Dependency unLoadDependency = conflictDepList.get(i);
                                         parent = unLoadDependency.getParentDependency();
                                         parent.addExclusionDependency(unLoadDependency);
-//                                        System.out.print("建议父依赖：");
-//                                        parent.printDependency();
-//                                        System.out.print("需要exclusion子依赖：");
-//                                        unLoadDependency.printDependency();
                                         addParentDepIntoDirectList(directDeps, parent);
                                     }
                                 }
@@ -526,10 +534,6 @@ public class SingleModule {
                                         Dependency unLoadDependency = conflictDepList.get(i);
                                         parent = unLoadDependency.getParentDependency();
                                         parent.addExclusionDependency(unLoadDependency);
-//                                        System.out.print("建议父依赖：");
-//                                        parent.printDependency();
-//                                        System.out.print("需要exclusion子依赖：");
-//                                        unLoadDependency.printDependency();
                                         addParentDepIntoDirectList(directDeps, parent);
                                     }
                                 }
@@ -551,10 +555,6 @@ public class SingleModule {
                                         Dependency unLoadDependency = conflictDepList.get(i);
                                         parent = unLoadDependency.getParentDependency();
                                         parent.addExclusionDependency(unLoadDependency);
-//                                        System.out.print("建议父依赖：");
-//                                        parent.printDependency();
-//                                        System.out.print("需要exclusion子依赖：");
-//                                        unLoadDependency.printDependency();
                                         addParentDepIntoDirectList(directDeps, parent);
                                     }
                                 }

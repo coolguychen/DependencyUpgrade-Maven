@@ -85,15 +85,26 @@ public class DependencyTree {
     public void constructTree(String rootPath) {
         try {
             Runtime runtime = Runtime.getRuntime();
-//            System.out.println("正在构造依赖关系......");
-            Process process = runtime.exec(new String[]{"cmd", "/c", "mvn dependency:tree -Dverbose > tree.txt"}, null, new File(rootPath));
-            //等待线程运行结束
+            Process process;
+
+            // 获取当前操作系统的名称
+            String os = System.getProperty("os.name").toLowerCase();
+
+            if (os.contains("win")) { // Windows操作系统
+                process = runtime.exec(new String[]{"cmd", "/c", "mvn dependency:tree -Dverbose > tree.txt"}, null, new File(rootPath));
+            } else if (os.contains("nix") || os.contains("nux") || os.contains("mac")) { // Linux或Mac操作系统
+                process = runtime.exec(new String[]{"sh", "-c", "mvn dependency:tree -Dverbose > tree.txt"}, null, new File(rootPath));
+            } else {
+                throw new UnsupportedOperationException("Unsupported operating system: " + os);
+            }
+
+            // 等待命令执行完成
             process.waitFor();
-//            System.out.println("构造完毕，输出tree.txt");
+
+            // 输出提示信息
+            System.out.println("构造完毕，输出tree.txt");
 //            printTree(rootPath + "/tree.txt");
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
